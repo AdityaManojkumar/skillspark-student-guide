@@ -9,12 +9,22 @@ interface User {
   collegeId: string;
 }
 
+interface ProfileData {
+  name: string;
+  dob: string;
+  semester: string;
+  college: string;
+  branch: string;
+}
+
 interface AuthContextType {
   user: User | null;
+  profileData: ProfileData | null;
   isAuthenticated: boolean;
   login: (username: string, password: string) => Promise<boolean>;
   register: (userData: RegisterData) => Promise<boolean>;
   logout: () => void;
+  updateProfile: (profileData: ProfileData) => void;
 }
 
 interface RegisterData {
@@ -36,20 +46,26 @@ export const useAuth = () => {
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     const userData = localStorage.getItem('user');
+    const storedProfileData = localStorage.getItem('profileData');
+    
     if (token && userData) {
       setUser(JSON.parse(userData));
       setIsAuthenticated(true);
+      
+      if (storedProfileData) {
+        setProfileData(JSON.parse(storedProfileData));
+      }
     }
   }, []);
 
   const login = async (username: string, password: string): Promise<boolean> => {
     try {
-      // Simulate API call - replace with actual backend call
       if (username === "demo" && password === "password") {
         const mockUser = {
           id: "1",
@@ -62,6 +78,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.setItem('user', JSON.stringify(mockUser));
         setUser(mockUser);
         setIsAuthenticated(true);
+        
+        // Load existing profile data if available
+        const storedProfileData = localStorage.getItem('profileData');
+        if (storedProfileData) {
+          setProfileData(JSON.parse(storedProfileData));
+        }
         
         toast({
           title: "Login Successful",
@@ -89,7 +111,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const register = async (userData: RegisterData): Promise<boolean> => {
     try {
-      // Simulate API call - replace with actual backend call
       const newUser = {
         id: Date.now().toString(),
         username: userData.username,
@@ -118,10 +139,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const updateProfile = (newProfileData: ProfileData) => {
+    setProfileData(newProfileData);
+    localStorage.setItem('profileData', JSON.stringify(newProfileData));
+  };
+
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('profileData');
     setUser(null);
+    setProfileData(null);
     setIsAuthenticated(false);
     toast({
       title: "Logged Out",
@@ -130,7 +158,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, login, register, logout }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      profileData, 
+      isAuthenticated, 
+      login, 
+      register, 
+      logout, 
+      updateProfile 
+    }}>
       {children}
     </AuthContext.Provider>
   );

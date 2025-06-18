@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,13 +11,13 @@ import { User, Calendar, GraduationCap, Building } from 'lucide-react';
 import { toast } from "@/hooks/use-toast";
 
 const Profile = () => {
-  const { user } = useAuth();
-  const [profileData, setProfileData] = useState({
-    name: 'John Doe',
-    dob: '2001-05-15',
-    semester: '5',
-    college: 'MIT',
-    branch: 'Computer Science'
+  const { user, profileData, updateProfile } = useAuth();
+  const [formData, setFormData] = useState({
+    name: '',
+    dob: '',
+    semester: '',
+    college: '',
+    branch: ''
   });
   const [isEditing, setIsEditing] = useState(false);
 
@@ -32,8 +32,15 @@ const Profile = () => {
 
   const semesters = ['1', '2', '3', '4', '5', '6', '7', '8'];
 
+  // Load profile data when component mounts or profileData changes
+  useEffect(() => {
+    if (profileData) {
+      setFormData(profileData);
+    }
+  }, [profileData]);
+
   const handleSave = () => {
-    // Here you would typically save to backend
+    updateProfile(formData);
     setIsEditing(false);
     toast({
       title: "Profile Updated",
@@ -42,10 +49,25 @@ const Profile = () => {
   };
 
   const handleChange = (field: string, value: string) => {
-    setProfileData(prev => ({
+    setFormData(prev => ({
       ...prev,
       [field]: value
     }));
+  };
+
+  const handleCancel = () => {
+    if (profileData) {
+      setFormData(profileData);
+    } else {
+      setFormData({
+        name: '',
+        dob: '',
+        semester: '',
+        college: '',
+        branch: ''
+      });
+    }
+    setIsEditing(false);
   };
 
   return (
@@ -66,21 +88,21 @@ const Profile = () => {
                 <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
                   <User className="w-12 h-12" />
                 </div>
-                <h2 className="text-xl font-bold mb-2">{profileData.name}</h2>
+                <h2 className="text-xl font-bold mb-2">{formData.name || 'No name set'}</h2>
                 <p className="text-blue-100 mb-1">{user?.email}</p>
                 <p className="text-blue-100 mb-4">ID: {user?.collegeId}</p>
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center justify-center gap-2">
                     <GraduationCap className="w-4 h-4" />
-                    <span>{profileData.branch}</span>
+                    <span>{formData.branch || 'No branch set'}</span>
                   </div>
                   <div className="flex items-center justify-center gap-2">
                     <Building className="w-4 h-4" />
-                    <span>{profileData.college}</span>
+                    <span>{formData.college || 'No college set'}</span>
                   </div>
                   <div className="flex items-center justify-center gap-2">
                     <Calendar className="w-4 h-4" />
-                    <span>Semester {profileData.semester}</span>
+                    <span>{formData.semester ? `Semester ${formData.semester}` : 'No semester set'}</span>
                   </div>
                 </div>
               </CardContent>
@@ -112,10 +134,11 @@ const Profile = () => {
                       <Label htmlFor="name">Full Name</Label>
                       <Input
                         id="name"
-                        value={profileData.name}
+                        value={formData.name}
                         onChange={(e) => handleChange('name', e.target.value)}
                         disabled={!isEditing}
                         className={!isEditing ? "bg-gray-50" : ""}
+                        placeholder="Enter your full name"
                       />
                     </div>
                     <div className="space-y-2">
@@ -123,7 +146,7 @@ const Profile = () => {
                       <Input
                         id="dob"
                         type="date"
-                        value={profileData.dob}
+                        value={formData.dob}
                         onChange={(e) => handleChange('dob', e.target.value)}
                         disabled={!isEditing}
                         className={!isEditing ? "bg-gray-50" : ""}
@@ -142,21 +165,22 @@ const Profile = () => {
                       <Label htmlFor="college">College Name</Label>
                       <Input
                         id="college"
-                        value={profileData.college}
+                        value={formData.college}
                         onChange={(e) => handleChange('college', e.target.value)}
                         disabled={!isEditing}
                         className={!isEditing ? "bg-gray-50" : ""}
+                        placeholder="Enter your college name"
                       />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="branch">Branch</Label>
                       <Select
-                        value={profileData.branch}
+                        value={formData.branch}
                         onValueChange={(value) => handleChange('branch', value)}
                         disabled={!isEditing}
                       >
                         <SelectTrigger className={!isEditing ? "bg-gray-50" : ""}>
-                          <SelectValue />
+                          <SelectValue placeholder="Select your branch" />
                         </SelectTrigger>
                         <SelectContent>
                           {branches.map(branch => (
@@ -170,12 +194,12 @@ const Profile = () => {
                     <div className="space-y-2">
                       <Label htmlFor="semester">Current Semester</Label>
                       <Select
-                        value={profileData.semester}
+                        value={formData.semester}
                         onValueChange={(value) => handleChange('semester', value)}
                         disabled={!isEditing}
                       >
                         <SelectTrigger className={!isEditing ? "bg-gray-50" : ""}>
-                          <SelectValue />
+                          <SelectValue placeholder="Select semester" />
                         </SelectTrigger>
                         <SelectContent>
                           {semesters.map(sem => (
@@ -221,7 +245,7 @@ const Profile = () => {
                     <Button onClick={handleSave} className="bg-green-600 hover:bg-green-700">
                       Save Changes
                     </Button>
-                    <Button onClick={() => setIsEditing(false)} variant="outline">
+                    <Button onClick={handleCancel} variant="outline">
                       Cancel
                     </Button>
                   </div>
