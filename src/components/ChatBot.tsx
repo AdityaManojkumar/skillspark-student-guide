@@ -1,10 +1,10 @@
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { X, Send, Bot, User } from 'lucide-react';
+import { X, Send, Bot, User, Move } from 'lucide-react';
 import { toast } from "@/hooks/use-toast";
 
 interface Message {
@@ -29,6 +29,48 @@ const ChatBot = ({ onClose }: ChatBotProps) => {
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const chatBotRef = useRef<HTMLDivElement>(null);
+
+  // Initialize position
+  useEffect(() => {
+    setPosition({ x: window.innerWidth - 340, y: 100 });
+  }, []);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    setDragStart({
+      x: e.clientX - position.x,
+      y: e.clientY - position.y
+    });
+  };
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (isDragging) {
+      setPosition({
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y
+      });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  useEffect(() => {
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging, dragStart]);
 
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
@@ -69,23 +111,31 @@ const ChatBot = ({ onClose }: ChatBotProps) => {
   const generateMockResponse = (question: string): string => {
     const lowerQuestion = question.toLowerCase();
     
+    if (lowerQuestion.includes('mern')) {
+      return "MERN stack consists of MongoDB, Express.js, React, and Node.js! It's perfect for full-stack development. MongoDB handles data storage, Express.js creates the backend API, React builds the frontend, and Node.js runs the server. Would you like specific guidance on any component?";
+    }
+    
     if (lowerQuestion.includes('javascript') || lowerQuestion.includes('js')) {
-      return "JavaScript is a versatile programming language! Here are some key concepts you should focus on: Variables, Functions, Objects, Arrays, DOM manipulation, and Asynchronous programming (Promises, async/await). Would you like me to explain any specific concept?";
+      return "JavaScript is a versatile programming language! Key concepts include: Variables, Functions, Objects, Arrays, DOM manipulation, and Asynchronous programming (Promises, async/await). It's essential for both frontend and backend development in the MERN stack.";
     }
     
     if (lowerQuestion.includes('react')) {
-      return "React is a powerful library for building user interfaces! Key concepts include: Components, JSX, Props, State, Hooks (useState, useEffect), and Component lifecycle. I recommend practicing with small projects like a todo app or weather app.";
+      return "React is a powerful library for building user interfaces! Key concepts include: Components, JSX, Props, State, Hooks (useState, useEffect), and Component lifecycle. It's the 'R' in MERN stack and handles the frontend beautifully.";
+    }
+    
+    if (lowerQuestion.includes('mongodb')) {
+      return "MongoDB is a NoSQL database that stores data in flexible, JSON-like documents. It's perfect for modern applications because it scales easily and works great with JavaScript. Key concepts: Collections, Documents, Queries, and Indexing.";
+    }
+    
+    if (lowerQuestion.includes('express')) {
+      return "Express.js is a minimal web framework for Node.js. It helps you build APIs and web servers quickly. Key features: Routing, Middleware, Error handling, and Integration with databases like MongoDB.";
     }
     
     if (lowerQuestion.includes('career') || lowerQuestion.includes('job')) {
-      return "For a successful tech career, focus on: 1) Building a strong portfolio with real projects, 2) Contributing to open source, 3) Networking with professionals, 4) Continuous learning, and 5) Preparing for technical interviews. What specific area would you like guidance on?";
+      return "For a successful tech career with MERN stack: 1) Build full-stack projects, 2) Learn about REST APIs and databases, 3) Practice with real-world applications, 4) Contribute to open source, 5) Build a strong portfolio showcasing your MERN projects.";
     }
     
-    if (lowerQuestion.includes('leetcode') || lowerQuestion.includes('coding')) {
-      return "For coding practice, I recommend starting with easy problems and gradually moving to medium difficulty. Focus on these patterns: Arrays, Strings, Linked Lists, Trees, and Dynamic Programming. Consistency is key - try to solve at least one problem daily!";
-    }
-    
-    return "That's a great question! Based on your skills and academic background, I'd recommend focusing on practical application of your knowledge through projects. Building real-world applications will help solidify your understanding and make you more attractive to employers. What specific topic would you like to explore further?";
+    return "That's a great question! Based on your interest in modern web development, I'd recommend exploring the MERN stack if you haven't already. It's a powerful combination for building full-stack applications. What specific area would you like to dive deeper into?";
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -96,21 +146,35 @@ const ChatBot = ({ onClose }: ChatBotProps) => {
   };
 
   return (
-    <Card className="fixed bottom-24 right-6 w-80 h-96 shadow-2xl z-50 bg-white">
-      <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg">
+    <Card 
+      ref={chatBotRef}
+      className="fixed w-80 h-96 shadow-2xl z-50 bg-white border border-gray-200"
+      style={{
+        left: position.x,
+        top: position.y,
+        cursor: isDragging ? 'grabbing' : 'default'
+      }}
+    >
+      <CardHeader 
+        className="bg-blue-600 text-white rounded-t-lg cursor-grab active:cursor-grabbing"
+        onMouseDown={handleMouseDown}
+      >
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-lg">
             <Bot className="w-5 h-5" />
             AI Assistant
           </CardTitle>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-            className="text-white hover:bg-white/20"
-          >
-            <X className="w-4 h-4" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <Move className="w-4 h-4 opacity-70" />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClose}
+              className="text-white hover:bg-white/20 h-6 w-6 p-0"
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
       </CardHeader>
       
@@ -125,7 +189,7 @@ const ChatBot = ({ onClose }: ChatBotProps) => {
                 }`}
               >
                 {message.sender === 'bot' && (
-                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
+                  <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
                     <Bot className="w-4 h-4 text-white" />
                   </div>
                 )}
@@ -133,7 +197,7 @@ const ChatBot = ({ onClose }: ChatBotProps) => {
                 <div
                   className={`max-w-[80%] p-3 rounded-lg ${
                     message.sender === 'user'
-                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
+                      ? 'bg-blue-600 text-white'
                       : 'bg-gray-100 text-gray-900'
                   }`}
                 >
@@ -150,7 +214,7 @@ const ChatBot = ({ onClose }: ChatBotProps) => {
             
             {isLoading && (
               <div className="flex items-start gap-2">
-                <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
                   <Bot className="w-4 h-4 text-white" />
                 </div>
                 <div className="bg-gray-100 p-3 rounded-lg">
@@ -178,7 +242,7 @@ const ChatBot = ({ onClose }: ChatBotProps) => {
             <Button
               onClick={handleSendMessage}
               disabled={isLoading || !inputValue.trim()}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              className="bg-blue-600 hover:bg-blue-700"
             >
               <Send className="w-4 h-4" />
             </Button>
