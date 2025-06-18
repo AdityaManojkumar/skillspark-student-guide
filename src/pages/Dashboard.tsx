@@ -1,217 +1,145 @@
 
-import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
 import Navigation from '@/components/Navigation';
 import ChatBot from '@/components/ChatBot';
 import SkillManager from '@/components/SkillManager';
 import SubjectManager from '@/components/SubjectManager';
-import { User, BookOpen, Brain, Target, MessageCircle, Plus } from 'lucide-react';
+import { 
+  User, 
+  BookOpen, 
+  Zap, 
+  Target,
+  TrendingUp,
+  Award
+} from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Dashboard = () => {
-  const { user } = useAuth();
-  const [showChatBot, setShowChatBot] = useState(false);
+  const { user, profileData } = useAuth();
 
-  // Mock data - replace with actual API calls
-  const [skills] = useState([
-    { id: '1', name: 'JavaScript', category: 'Programming' },
-    { id: '2', name: 'React', category: 'Frontend' },
-    { id: '3', name: 'Node.js', category: 'Backend' },
-    { id: '4', name: 'Data Structures', category: 'Computer Science' }
-  ]);
-
-  const [subjects] = useState([
-    { id: '1', name: 'Computer Science Fundamentals', semester: 1 },
-    { id: '2', name: 'Data Structures and Algorithms', semester: 2 },
-    { id: '3', name: 'Web Development', semester: 3 },
-    { id: '4', name: 'Database Management', semester: 4 }
-  ]);
+  const stats = [
+    {
+      title: 'Skills Added',
+      value: '8',
+      icon: Zap,
+      color: 'text-blue-600'
+    },
+    {
+      title: 'Subjects',
+      value: '6',
+      icon: BookOpen,
+      color: 'text-green-600'
+    },
+    {
+      title: 'Projects',
+      value: '3',
+      icon: Target,
+      color: 'text-purple-600'
+    }
+  ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gray-50">
       <Navigation />
       
       <div className="container mx-auto px-4 py-8">
+        {/* Welcome Section */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Welcome back, {user?.username}! 👋
+            Welcome back, {profileData?.name || user?.username || 'Student'}!
           </h1>
           <p className="text-gray-600">
-            Track your academic progress and get personalized recommendations
+            Manage your skills and get personalized recommendations
           </p>
         </div>
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <Brain className="w-8 h-8 mr-3" />
-                <div>
-                  <p className="text-blue-100">Skills</p>
-                  <p className="text-2xl font-bold">{skills.length}</p>
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          {stats.map((stat, index) => (
+            <Card key={index} className="border-0 shadow-sm">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">{stat.title}</p>
+                    <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+                  </div>
+                  <stat.icon className={`w-8 h-8 ${stat.color}`} />
                 </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          {/* Profile Section */}
+          <Card className="border-0 shadow-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <User className="w-5 h-5" />
+                Profile Summary
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div>
+                  <p className="text-sm text-gray-600">Name</p>
+                  <p className="font-medium">{profileData?.name || 'Not set'}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Branch</p>
+                  <p className="font-medium">{profileData?.branch || 'Not set'}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Semester</p>
+                  <p className="font-medium">{profileData?.semester ? `Semester ${profileData.semester}` : 'Not set'}</p>
+                </div>
+                <Link to="/profile">
+                  <Button variant="outline" size="sm" className="mt-4">
+                    Update Profile
+                  </Button>
+                </Link>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white">
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <BookOpen className="w-8 h-8 mr-3" />
-                <div>
-                  <p className="text-green-100">Subjects</p>
-                  <p className="text-2xl font-bold">{subjects.length}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white">
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <Target className="w-8 h-8 mr-3" />
-                <div>
-                  <p className="text-purple-100">Projects</p>
-                  <p className="text-2xl font-bold">12</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-r from-orange-500 to-orange-600 text-white">
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <User className="w-8 h-8 mr-3" />
-                <div>
-                  <p className="text-orange-100">Companies</p>
-                  <p className="text-2xl font-bold">8</p>
-                </div>
+          {/* Quick Actions */}
+          <Card className="border-0 shadow-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="w-5 h-5" />
+                Quick Actions
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <Link to="/recommendations">
+                  <Button className="w-full justify-start bg-blue-600 hover:bg-blue-700">
+                    <Award className="w-4 h-4 mr-2" />
+                    View Recommendations
+                  </Button>
+                </Link>
+                <Link to="/profile">
+                  <Button variant="outline" className="w-full justify-start">
+                    <User className="w-4 h-4 mr-2" />
+                    Complete Profile
+                  </Button>
+                </Link>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Main Content */}
-        <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="skills">Skills</TabsTrigger>
-            <TabsTrigger value="subjects">Subjects</TabsTrigger>
-            <TabsTrigger value="profile">Profile</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Brain className="w-5 h-5" />
-                    Recent Skills
-                  </CardTitle>
-                  <CardDescription>
-                    Your latest skill additions
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {skills.slice(0, 4).map(skill => (
-                      <div key={skill.id} className="flex items-center justify-between">
-                        <span className="font-medium">{skill.name}</span>
-                        <Badge variant="secondary">{skill.category}</Badge>
-                      </div>
-                    ))}
-                  </div>
-                  <Button variant="outline" className="w-full mt-4">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add New Skill
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BookOpen className="w-5 h-5" />
-                    Current Subjects
-                  </CardTitle>
-                  <CardDescription>
-                    Subjects you're currently studying
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {subjects.slice(0, 4).map(subject => (
-                      <div key={subject.id} className="flex items-center justify-between">
-                        <span className="font-medium">{subject.name}</span>
-                        <Badge variant="outline">Sem {subject.semester}</Badge>
-                      </div>
-                    ))}
-                  </div>
-                  <Button variant="outline" className="w-full mt-4">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add New Subject
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="skills">
-            <SkillManager />
-          </TabsContent>
-
-          <TabsContent value="subjects">
-            <SubjectManager />
-          </TabsContent>
-
-          <TabsContent value="profile">
-            <Card>
-              <CardHeader>
-                <CardTitle>Student Profile</CardTitle>
-                <CardDescription>
-                  Manage your personal and academic information
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-medium">Username</label>
-                      <p className="text-lg">{user?.username}</p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium">Email</label>
-                      <p className="text-lg">{user?.email}</p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium">College ID</label>
-                      <p className="text-lg">{user?.collegeId}</p>
-                    </div>
-                  </div>
-                  <Button>Edit Profile</Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-
-        {/* Floating Chat Button */}
-        <Button
-          onClick={() => setShowChatBot(!showChatBot)}
-          className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg z-40"
-        >
-          <MessageCircle className="w-6 h-6" />
-        </Button>
-
-        {/* ChatBot Component */}
-        {showChatBot && (
-          <ChatBot onClose={() => setShowChatBot(false)} />
-        )}
+        {/* Skills and Subjects */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <SkillManager />
+          <SubjectManager />
+        </div>
       </div>
+
+      <ChatBot />
     </div>
   );
 };

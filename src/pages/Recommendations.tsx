@@ -10,8 +10,7 @@ import {
   Code2, 
   ExternalLink, 
   Target,
-  Zap,
-  Users
+  Clock
 } from 'lucide-react';
 
 interface Project {
@@ -151,48 +150,48 @@ const Recommendations = () => {
     switch (difficulty) {
       case 'Easy':
       case 'Beginner':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-50 text-green-700 border-green-200';
       case 'Medium':
       case 'Intermediate':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-yellow-50 text-yellow-700 border-yellow-200';
       case 'Hard':
       case 'Advanced':
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-50 text-red-700 border-red-200';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-50 text-gray-700 border-gray-200';
     }
   };
 
   const getTypeColor = (type: string) => {
     switch (type) {
       case 'Remote':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-blue-50 text-blue-700 border-blue-200';
       case 'On-site':
-        return 'bg-purple-100 text-purple-800';
+        return 'bg-purple-50 text-purple-700 border-purple-200';
       case 'Hybrid':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-50 text-green-700 border-green-200';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-50 text-gray-700 border-gray-200';
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gray-50">
       <Navigation />
       
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-2">
             <Target className="w-8 h-8 text-blue-600" />
-            Personalized Recommendations
+            Recommendations
           </h1>
           <p className="text-gray-600">
-            Based on your skills: JavaScript, React, Node.js, Data Structures, MongoDB
+            Personalized suggestions based on your skills
           </p>
         </div>
 
         <Tabs defaultValue="projects" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-3 bg-white border shadow-sm">
             <TabsTrigger value="projects" className="flex items-center gap-2">
               <Lightbulb className="w-4 h-4" />
               Projects
@@ -203,158 +202,119 @@ const Recommendations = () => {
             </TabsTrigger>
             <TabsTrigger value="leetcode" className="flex items-center gap-2">
               <Code2 className="w-4 h-4" />
-              LeetCode
+              Practice
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="projects" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Lightbulb className="w-5 h-5 text-yellow-600" />
-                  Recommended Projects
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {projects.map(project => (
-                    <Card key={project.id} className="hover:shadow-lg transition-shadow">
-                      <CardContent className="p-6">
-                        <div className="flex items-start justify-between mb-3">
-                          <h3 className="font-semibold text-lg">{project.title}</h3>
-                          <Badge className={getDifficultyColor(project.difficulty)}>
-                            {project.difficulty}
+          <TabsContent value="projects">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {projects.map(project => (
+                <Card key={project.id} className="border-0 shadow-sm hover:shadow-md transition-shadow">
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between mb-3">
+                      <h3 className="font-semibold text-lg">{project.title}</h3>
+                      <Badge className={getDifficultyColor(project.difficulty)}>
+                        {project.difficulty}
+                      </Badge>
+                    </div>
+                    <p className="text-gray-600 text-sm mb-4 line-clamp-3">{project.description}</p>
+                    <div className="space-y-4">
+                      <div className="flex flex-wrap gap-1">
+                        {project.skills.map(skill => (
+                          <Badge key={skill} variant="secondary" className="text-xs">
+                            {skill}
+                          </Badge>
+                        ))}
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600 flex items-center gap-1">
+                          <Clock className="w-4 h-4" />
+                          {project.duration}
+                        </span>
+                        <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                          Start
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="companies">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {companies.map(company => (
+                <Card key={company.id} className="border-0 shadow-sm hover:shadow-md transition-shadow">
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-4">
+                      <div className="text-2xl">{company.logo}</div>
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between mb-2">
+                          <div>
+                            <h3 className="font-semibold text-lg">{company.name}</h3>
+                            <p className="text-blue-600 font-medium">{company.role}</p>
+                          </div>
+                          <Badge className={getTypeColor(company.type)}>
+                            {company.type}
                           </Badge>
                         </div>
-                        <p className="text-gray-600 text-sm mb-4">{project.description}</p>
-                        <div className="space-y-3">
-                          <div>
-                            <p className="text-sm font-medium text-gray-700 mb-2">Skills used:</p>
-                            <div className="flex flex-wrap gap-1">
-                              {project.skills.map(skill => (
-                                <Badge key={skill} variant="secondary" className="text-xs">
-                                  {skill}
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
-                          <div className="flex items-center justify-between text-sm text-gray-600">
-                            <span className="flex items-center gap-1">
-                              <Zap className="w-4 h-4" />
-                              {project.duration}
-                            </span>
-                            <Button size="sm" className="bg-gradient-to-r from-blue-600 to-purple-600">
-                              Start Project
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="companies" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Building2 className="w-5 h-5 text-blue-600" />
-                  Companies Hiring
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {companies.map(company => (
-                    <Card key={company.id} className="hover:shadow-lg transition-shadow">
-                      <CardContent className="p-6">
-                        <div className="flex items-start gap-4">
-                          <div className="text-3xl">{company.logo}</div>
-                          <div className="flex-1">
-                            <div className="flex items-start justify-between mb-2">
-                              <div>
-                                <h3 className="font-semibold text-lg">{company.name}</h3>
-                                <p className="text-blue-600 font-medium">{company.role}</p>
-                              </div>
-                              <Badge className={getTypeColor(company.type)}>
-                                {company.type}
+                        <p className="text-gray-600 text-sm mb-4">{company.location}</p>
+                        <div className="space-y-4">
+                          <div className="flex flex-wrap gap-1">
+                            {company.skills.map(skill => (
+                              <Badge key={skill} variant="secondary" className="text-xs">
+                                {skill}
                               </Badge>
-                            </div>
-                            <p className="text-gray-600 text-sm mb-3 flex items-center gap-1">
-                              <Users className="w-4 h-4" />
-                              {company.location}
-                            </p>
-                            <div className="space-y-3">
-                              <div>
-                                <p className="text-sm font-medium text-gray-700 mb-2">Required skills:</p>
-                                <div className="flex flex-wrap gap-1">
-                                  {company.skills.map(skill => (
-                                    <Badge key={skill} variant="secondary" className="text-xs">
-                                      {skill}
-                                    </Badge>
-                                  ))}
-                                </div>
-                              </div>
-                              <Button className="w-full bg-gradient-to-r from-green-600 to-blue-600">
-                                <ExternalLink className="w-4 h-4 mr-2" />
-                                View Job
-                              </Button>
-                            </div>
+                            ))}
                           </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="leetcode" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Code2 className="w-5 h-5 text-green-600" />
-                  LeetCode Problems
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {leetcodeProblems.map(problem => (
-                    <Card key={problem.id} className="hover:shadow-md transition-shadow">
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-2">
-                              <h3 className="font-semibold">{problem.title}</h3>
-                              <Badge className={getDifficultyColor(problem.difficulty)}>
-                                {problem.difficulty}
-                              </Badge>
-                            </div>
-                            <div className="flex flex-wrap gap-1">
-                              {problem.tags.map(tag => (
-                                <Badge key={tag} variant="outline" className="text-xs">
-                                  {tag}
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
-                          <Button 
-                            size="sm" 
-                            className="bg-gradient-to-r from-orange-600 to-red-600"
-                            onClick={() => window.open(problem.url, '_blank')}
-                          >
+                          <Button className="w-full bg-green-600 hover:bg-green-700">
                             <ExternalLink className="w-4 h-4 mr-2" />
-                            Solve
+                            View Position
                           </Button>
                         </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="leetcode">
+            <div className="space-y-4">
+              {leetcodeProblems.map(problem => (
+                <Card key={problem.id} className="border-0 shadow-sm hover:shadow-md transition-shadow">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h3 className="font-semibold">{problem.title}</h3>
+                          <Badge className={getDifficultyColor(problem.difficulty)}>
+                            {problem.difficulty}
+                          </Badge>
+                        </div>
+                        <div className="flex flex-wrap gap-1">
+                          {problem.tags.map(tag => (
+                            <Badge key={tag} variant="outline" className="text-xs">
+                              {tag}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                      <Button 
+                        size="sm" 
+                        className="bg-orange-600 hover:bg-orange-700"
+                        onClick={() => window.open(problem.url, '_blank')}
+                      >
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        Solve
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </TabsContent>
         </Tabs>
       </div>
